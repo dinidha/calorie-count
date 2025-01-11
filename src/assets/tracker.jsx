@@ -7,6 +7,7 @@ const CalorieTracker = () => {
   const [dinner, setDinner] = useState("");
   const [snacks, setSnacks] = useState([]);
   const [calorieData, setCalorieData] = useState(null);
+  const [allData, setAllData] = useState([]); // State to store all data
 
   const API_URL = "https://calorie-count-api.dinidha.workers.dev/api/data";
   const API_KEY = "f294a31a7ba443aeba5bbd623afd88cf"; // Replace with your actual API key
@@ -16,11 +17,17 @@ const CalorieTracker = () => {
     try {
       const response = await fetch(`${API_URL}?date=${selectedDate}`, {
         headers: {
-          "Authorization": `Bearer ${API_KEY}`,
+          "X-API-Key": API_KEY,
           "Content-Type": "application/json",
         },
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
       const data = await response.json();
+      console.log("API Response:", data); // Log the response
       setCalorieData(data);
       if (data) {
         setBreakfast(data.breakfast || "");
@@ -47,7 +54,7 @@ const CalorieTracker = () => {
       await fetch(API_URL, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${API_KEY}`,
+          "X-API-Key": API_KEY,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
@@ -55,6 +62,28 @@ const CalorieTracker = () => {
       fetchData(); // Refresh data after saving
     } catch (error) {
       console.error("Error saving data:", error);
+    }
+  };
+
+  // Fetch all data from the API
+  const fetchAllData = async () => {
+    try {
+      const response = await fetch(API_URL, {
+        headers: {
+          "X-API-Key": API_KEY,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("All Data:", data); // Log all data
+      setAllData(data); // Store all data in state
+    } catch (error) {
+      console.error("Error fetching all data:", error);
     }
   };
 
@@ -98,6 +127,11 @@ const CalorieTracker = () => {
   useEffect(() => {
     fetchData();
   }, [selectedDate]);
+
+  // Fetch all data on component mount
+  useEffect(() => {
+    fetchAllData();
+  }, []);
 
   return (
     <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
@@ -170,6 +204,21 @@ const CalorieTracker = () => {
           Remaining: {remainingCalories} kcal{" "}
           {remainingCalories < 0 && `(Exceeded by ${-remainingCalories} kcal)`}
         </p>
+      </div>
+
+      <div style={{ marginTop: "20px" }}>
+        <h2>All Data</h2>
+        <ul>
+          {allData.map((entry, index) => (
+            <li key={index}>
+              <p>Date: {entry.date}</p>
+              <p>Breakfast: {entry.breakfast} kcal</p>
+              <p>Lunch: {entry.lunch} kcal</p>
+              <p>Dinner: {entry.dinner} kcal</p>
+              <p>Snacks: {entry.snacks}</p>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );

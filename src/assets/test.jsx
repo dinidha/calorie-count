@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 const FetchAllData = () => {
-  const [data, setData] = useState([]); // State to store the fetched data
+  const [data, setData] = useState([]); // State to store fetched data
   const [loading, setLoading] = useState(true); // State to handle loading
   const [error, setError] = useState(null); // State to handle errors
 
@@ -13,22 +13,23 @@ const FetchAllData = () => {
     try {
       const response = await fetch(API_URL, {
         headers: {
-          Authorization: `Bearer ${API_KEY}`,
+          "X-API-Key": API_KEY, // Use X-API-Key for authentication
           "Content-Type": "application/json",
         },
       });
 
+      // Handle HTTP errors
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
       const result = await response.json();
       setData(result); // Set the fetched data
-      setLoading(false); // Set loading to false
+      setLoading(false); // Stop loading
     } catch (error) {
       console.error("Error fetching data:", error);
       setError("Failed to fetch data. Please try again."); // Set error message
-      setLoading(false); // Set loading to false
+      setLoading(false); // Stop loading
     }
   };
 
