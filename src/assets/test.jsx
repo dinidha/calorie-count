@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 
 const FetchAllData = () => {
   const [data, setData] = useState([]); // State to store the fetched data
@@ -9,20 +8,22 @@ const FetchAllData = () => {
   const API_URL = "https://calorie-count-api.dinidha.workers.dev/api/data";
   const API_KEY = "f294a31a7ba443aeba5bbd623afd88cf"; // Replace with your actual API key
 
-  // Axios instance with API key in headers
-  const api = axios.create({
-    baseURL: API_URL,
-    headers: {
-      Authorization: `Bearer ${API_KEY}`,
-      "Content-Type": "application/json",
-    },
-  });
-
   // Fetch all data from the API
   const fetchAllData = async () => {
     try {
-      const response = await api.get("/"); // Fetch all data
-      setData(response.data); // Set the fetched data
+      const response = await fetch(API_URL, {
+        headers: {
+          Authorization: `Bearer ${API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      setData(result); // Set the fetched data
       setLoading(false); // Set loading to false
     } catch (error) {
       console.error("Error fetching data:", error);
